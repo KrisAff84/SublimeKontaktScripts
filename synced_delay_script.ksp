@@ -1,0 +1,75 @@
+on init
+
+	declare ui_slider $DelayRate(0,12)                     {Delay Rate Knob}
+		move_control_px($DelayRate,400,119)
+		make_persistent ($DelayRate)
+
+		declare $DelayRateID									{Delay Rate Knob Animation}
+		$DelayRateID := get_ui_id($DelayRate)							
+		set_control_par_str($DelayRateID, $CONTROL_PAR_PICTURE,"delayknob")
+		set_control_par($DelayRateID, $CONTROL_PAR_MOUSE_BEHAVIOUR, -700)
+
+		declare ui_label $RateLabel(0,0)						{Delay Rate Label}
+		set_text($RateLabel,"Rate")
+		move_control_px($RateLabel,439,122)
+		hide_part($RateLabel,$HIDE_PART_BG)
+		
+
+	declare !rate[13]										{Delay Rates}
+		!rate[0] := "1/1"
+		!rate[1] := "Dotted 1/2"
+		!rate[2] := "1/2"
+		!rate[3] := "Dotted 1/4"
+		!rate[4] := "1/2 Triplet"
+		!rate[5] := "1/4"
+		!rate[6] := "Dotted 1/8"
+		!rate[7] := "1/4 Triplet"
+		!rate[8] := "1/8"
+		!rate[9] := "Dotted 1/16"
+		!rate[10] := "1/8 Triplet"
+		!rate[11] := "1/16"
+		!rate[12] := "1/16 Triplet"
+	
+	declare %dly_sync_unit[13] 							
+			%dly_sync_unit[0] := $NI_SYNC_UNIT_WHOLE			{1/1}            
+			%dly_sync_unit[1] := $NI_SYNC_UNIT_QUARTER			{3/4}
+			%dly_sync_unit[2] := $NI_SYNC_UNIT_HALF				{1/2}
+			%dly_sync_unit[3] := $NI_SYNC_UNIT_8TH				{Dotted Quarter 3/8}
+			%dly_sync_unit[4] := $NI_SYNC_UNIT_HALF_TRIPLET		{1/2 Triplet}
+			%dly_sync_unit[5] := $NI_SYNC_UNIT_QUARTER			{1/4}
+			%dly_sync_unit[6] := $NI_SYNC_UNIT_16TH				{Dotted 8th}
+			%dly_sync_unit[7] := $NI_SYNC_UNIT_QUARTER_TRIPLET	{1/4 Triplet}
+			%dly_sync_unit[8] := $NI_SYNC_UNIT_8TH				{1/8}
+			%dly_sync_unit[9] := $NI_SYNC_UNIT_32ND				{Dotted 1/16}
+			%dly_sync_unit[10] := $NI_SYNC_UNIT_8TH_TRIPLET		{1/8 Triplet}
+			%dly_sync_unit[11] := $NI_SYNC_UNIT_16TH			{1/16}
+			%dly_sync_unit[12] := $NI_SYNC_UNIT_16TH_TRIPLET	{1/16 Triplet}
+
+	declare %dly_sync_value[13] 
+			%dly_sync_value[0] := 0	
+			%dly_sync_value[1] := 181818
+			%dly_sync_value[2] := 0
+			%dly_sync_value[3] := 181818
+			%dly_sync_value[4] := 0
+			%dly_sync_value[5] := 0
+			%dly_sync_value[6] := 181818
+			%dly_sync_value[7] := 0
+			%dly_sync_value[8] := 0
+			%dly_sync_value[9] := 181818
+			%dly_sync_value[10] := 0
+			%dly_sync_value[11] := 0
+			%dly_sync_value[12] := 0
+
+
+on ui_control($DelayRate)				{Delay Rate Label Updating + Engine Parameters}
+	
+		inc(%timer[5])
+		set_text($RateLabel,!rate[$DelayRate])
+		set_engine_par($ENGINE_PAR_RDL_TIME_UNIT,%dly_sync_unit[$DelayRate],-1,1,1)  
+    	set_engine_par($ENGINE_PAR_RDL_TIME,%dly_sync_value[$DelayRate],-1,1,1)
+		wait($UIWaitTime)
+		dec(%timer[5])
+		if(%timer[5] = 0)
+				set_text($RateLabel,"Rate")		
+        end if
+end on
